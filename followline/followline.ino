@@ -1,9 +1,15 @@
+#include "Arduino.h"
+#include "Sensor.h"
+
+
+
 void setup() {
   // put your setup code here, to run once:
-
+  sensor.Setup();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  sensor.readSensors();
+  sensor.writeDatas();
+  delay(50);
 }
