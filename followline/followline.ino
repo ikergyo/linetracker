@@ -5,7 +5,7 @@
 #include "Timer_Config.h"
 
 boolean IR_read;
-int base_rpm = 160;
+int base_rpm = 185;
 
 int onTime = 0;
 void setup() {
