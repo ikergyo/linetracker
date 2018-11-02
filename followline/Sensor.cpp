@@ -2,12 +2,12 @@
 #include "Arduino.h"
 #include "Sensor.h"
 
-#define SENSOR_NUM 9
+
 const int limitLine = 600;
 
 int pureSens[SENSOR_NUM];
-int sens[SENSOR_NUM];
-int bufferSens[SENSOR_NUM];
+byte sens[SENSOR_NUM];
+byte bufferSens[SENSOR_NUM];
 
 Sensor::Sensor(){
 }
@@ -82,7 +82,25 @@ void Sensor::loadLast(){
     bufferCopy(true);
   }
 }
-
+float Sensor::sensorIndexAvarage(){
+  float sum = 0;
+  float count = 0;
+  for(int i=0; i<SENSOR_NUM;i++){
+    if(sens[i] == 1){
+      sum += i;
+      count++;
+    }
+  }
+  return sum/count;
+}
+int Sensor::getRightBit(){
+  for(int i=0; i<SENSOR_NUM; i++){
+    if(sens[i] == 1){
+      return i;
+    }
+  }
+  return SENSOR_NUM/2; //közepe
+}
 void Sensor::writeDatas(){
 
   for(int i = 0; i< SENSOR_NUM;i++){

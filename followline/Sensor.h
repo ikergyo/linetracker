@@ -21,13 +21,17 @@
 #define SD8 50
 #define SD9 52
 
+#define SENSOR_NUM 9
+
 class Sensor
 {
   public:
     Sensor();
     void Setup();
     void readSensors();
-    void writeDatas(); 
+    void writeDatas();
+    float sensorIndexAvarage();
+    int getRightBit(); 
       
   private:
     void loadLast(); 
@@ -35,5 +39,6 @@ class Sensor
 };
 
 extern Sensor sensor;
+extern byte bufferSens[SENSOR_NUM];
 
 #endif
