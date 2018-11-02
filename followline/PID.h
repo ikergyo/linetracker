@@ -9,7 +9,9 @@ class PID{
     double Output;
     double errSum, lastErr;
     double errSum_array[10] = {0,0,0,0,0,0,0,0,0,0};
-    double kp=2;
+
+    double kp=3;
+
     double ki=0;
     double kd=0;
 };
