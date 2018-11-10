@@ -26,7 +26,7 @@ void loop() {
 ISR(TIMER5_OVF_vect){
   IR_read = true;
 
-  int rpm = pid.LineTrackingControl(sensor.getRightBit()*10,40.0);
+  int rpm = pid.LineTrackingControl(sensor.getRightBit(sensor.sens)*10,40.0);
 
 
   int R_rpm = base_rpm-rpm;

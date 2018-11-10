@@ -22,23 +22,30 @@
 #define SD9 52
 
 #define SENSOR_NUM 9
+#define BUFFER_NUM 100
 
 class Sensor
 {
   public:
     Sensor();
+    byte sens[SENSOR_NUM];
+    byte bufferSens[BUFFER_NUM][SENSOR_NUM];
     void Setup();
     void readSensors();
     void writeDatas();
     float sensorIndexAvarage();
-    int getRightBit(); 
+    int getRightBit(byte sensData[]); 
+    int getLeftBit(byte sensData[]);
       
   private:
     void loadLast(); 
+    
+    void addBuffer(byte actualSensData[]);
     void bufferCopy(boolean bufferToSens);
 };
 
 extern Sensor sensor;
-extern byte bufferSens[SENSOR_NUM];
+/*extern byte sens[SENSOR_NUM] sens;
+extern byte bufferSens[BUFFER_NUM][SENSOR_NUM];*/
 
 #endif

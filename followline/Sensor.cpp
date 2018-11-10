@@ -6,8 +6,9 @@
 const int limitLine = 600;
 
 int pureSens[SENSOR_NUM];
-byte sens[SENSOR_NUM];
-byte bufferSens[SENSOR_NUM];
+/*byte sens[SENSOR_NUM];
+byte bufferSens[BUFFER_NUM][SENSOR_NUM];*/
+int bufferSensCount = 0;
 
 Sensor::Sensor(){
 }
@@ -63,11 +64,10 @@ void Sensor::readSensors(){
 void Sensor::bufferCopy(boolean bufferToSens){
   if(bufferToSens){
     for(int i=0; i< SENSOR_NUM; i++){
-      sens[i]=bufferSens[i];
+      sens[i]=bufferSens[bufferSensCount][i];
     }
-  }
-  for(int i=0; i< SENSOR_NUM; i++){
-    bufferSens[i]=sens[i];
+  }else  {
+    addBuffer(sens);
   }
 }
 void Sensor::loadLast(){
@@ -93,13 +93,24 @@ float Sensor::sensorIndexAvarage(){
   }
   return sum/count;
 }
-int Sensor::getRightBit(){
+int Sensor::getRightBit(byte sensData[]){
   for(int i=0; i<SENSOR_NUM; i++){
-    if(sens[i] == 1){
+    if(sensData[i] == 1){
       return i;
     }
   }
   return SENSOR_NUM/2; //közepe
+}
+int Sensor::getLeftBit(byte sensData[]){
+  for(int i=SENSOR_NUM-1; i>-1; i--){
+    if(sensData[i] == 1){
+      return i;
+    }
+  }
+  return SENSOR_NUM/2; //közepe
+}
+int Sensor::getDefaultBit(byte sensData[]){
+  
 }
 void Sensor::writeDatas(){
 
@@ -108,6 +119,15 @@ void Sensor::writeDatas(){
   }
   Serial.println();
   
+}
+void Sensor::addBuffer(byte actualSensData[]){
+  for(int i = 0; i<SENSOR_NUM; i++){
+    bufferSens[bufferSensCount][i] = actualSensData[i];
+  }
+  bufferSensCount++;
+  if(bufferSensCount>BUFFER_NUM){
+    bufferSensCount = 0;
+  }
 }
 
 Sensor sensor = Sensor();
