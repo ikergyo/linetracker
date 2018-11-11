@@ -99,7 +99,7 @@ int Sensor::getRightBit(byte sensData[]){
       return i;
     }
   }
-  return SENSOR_NUM/2; //kÃ¶zepe
+  return SENSOR_NUM/2; //közepe
 }
 int Sensor::getLeftBit(byte sensData[]){
   for(int i=SENSOR_NUM-1; i>-1; i--){
@@ -107,7 +107,7 @@ int Sensor::getLeftBit(byte sensData[]){
       return i;
     }
   }
-  return SENSOR_NUM/2; //kÃ¶zepe
+  return SENSOR_NUM/2; //közepe
 }
 int Sensor::getMainBit(byte sensData[]){
   int tempBit = getCorrectBit(sensData);
@@ -135,7 +135,7 @@ void Sensor::writeDatas(){
 }
 void Sensor::addBuffer(byte actualSensData[]){
 
-  memcpy(bufferSens[1],bufferSens[0], SENSOR_NUM*(BUFFER_NUM-1)*sizeof(byte))
+  memcpy(bufferSens[1],bufferSens[0], SENSOR_NUM*(BUFFER_NUM-1)*sizeof(byte));
   for(int i = 0; i<SENSOR_NUM; i++){
  //   bufferSens[bufferSensCount][i] = actualSensData[i];
     bufferSens[0][i] = actualSensData[i];
