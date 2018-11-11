@@ -18,13 +18,15 @@ void setup() {
 }
 
 void loop() {
-  sensor.readSensors();
-  sensor.writeDatas();
+
 }
 
 //timer configba
 ISR(TIMER5_OVF_vect){
   IR_read = true;
+
+  sensor.readSensors();
+  sensor.writeDatas();
 
   int rpm = pid.LineTrackingControl(sensor.getMainBit(sensor.sens)*10,40.0);
 

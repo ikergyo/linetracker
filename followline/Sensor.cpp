@@ -8,7 +8,7 @@ const int limitLine = 600;
 int pureSens[SENSOR_NUM];
 /*byte sens[SENSOR_NUM];
 byte bufferSens[BUFFER_NUM][SENSOR_NUM];*/
-int bufferSensCount = 0;
+//int bufferSensCount = 0;
 
 Sensor::Sensor(){
 }
@@ -64,7 +64,7 @@ void Sensor::readSensors(){
 void Sensor::bufferCopy(boolean bufferToSens){
   if(bufferToSens){
     for(int i=0; i< SENSOR_NUM; i++){
-      sens[i]=bufferSens[bufferSensCount][i];
+      sens[i]=bufferSens[0][i];
     }
   }else  {
     addBuffer(sens);
@@ -119,7 +119,7 @@ int Sensor::getMainBit(byte sensData[]){
 }
 int Sensor::getCorrectBit(byte sensData[]){
   for (int i = 0; i<SENSOR_NUM; i++){
-    if(sensData[i] == 1 && bufferSens[bufferSensCount][i] == 1){
+    if(sensData[i] == 1 && bufferSens[0][i] == 1){
       return i;
     }
   }
@@ -134,13 +134,16 @@ void Sensor::writeDatas(){
   
 }
 void Sensor::addBuffer(byte actualSensData[]){
+
+  memcpy(bufferSens[1],bufferSens[0], SENSOR_NUM*(BUFFER_NUM-1)*sizeof(byte))
   for(int i = 0; i<SENSOR_NUM; i++){
-    bufferSens[bufferSensCount][i] = actualSensData[i];
+ //   bufferSens[bufferSensCount][i] = actualSensData[i];
+    bufferSens[0][i] = actualSensData[i];
   }
-  bufferSensCount++;
-  if(bufferSensCount>BUFFER_NUM){
-    bufferSensCount = 0;
-  }
+//  bufferSensCount++;
+//  if(bufferSensCount>BUFFER_NUM){
+//    bufferSensCount = 0;
+//  }
 }
 
 Sensor sensor = Sensor();
