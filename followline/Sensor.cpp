@@ -109,8 +109,21 @@ int Sensor::getLeftBit(byte sensData[]){
   }
   return SENSOR_NUM/2; //közepe
 }
-int Sensor::getDefaultBit(byte sensData[]){
-  
+int Sensor::getMainBit(byte sensData[]){
+  int tempBit = getCorrectBit(sensData);
+  if(tempBit != -1){
+    return tempBit;
+  }else{
+    return getRightBit(sensData);
+  }
+}
+int Sensor::getCorrectBit(byte sensData[]){
+  for (int i = 0; i<SENSOR_NUM; i++){
+    if(sensData[i] == 1 && bufferSens[bufferSensCount][i] == 1){
+      return i;
+    }
+  }
+  return -1;
 }
 void Sensor::writeDatas(){
 

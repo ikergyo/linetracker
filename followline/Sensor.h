@@ -22,7 +22,7 @@
 #define SD9 52
 
 #define SENSOR_NUM 9
-#define BUFFER_NUM 100
+#define BUFFER_NUM 50
 
 class Sensor
 {
@@ -34,12 +34,14 @@ class Sensor
     void readSensors();
     void writeDatas();
     float sensorIndexAvarage();
-    int getRightBit(byte sensData[]); 
-    int getLeftBit(byte sensData[]);
+    
+    int getMainBit(byte sensData[]);
       
   private:
     void loadLast(); 
-    
+    int getRightBit(byte sensData[]); 
+    int getLeftBit(byte sensData[]);
+    int getCorrectBit(byte sensData[]);
     void addBuffer(byte actualSensData[]);
     void bufferCopy(boolean bufferToSens);
 };
