@@ -6,8 +6,12 @@
 const int limitLine = 600;
 
 int pureSens[SENSOR_NUM];
-/*byte sens[SENSOR_NUM];
-byte bufferSens[BUFFER_NUM][SENSOR_NUM];*/
+boolean nowLaneChange = false;
+int laneChangeBit = -1;
+/*
+byte sens[SENSOR_NUM];
+byte bufferSens[BUFFER_NUM][SENSOR_NUM];
+*/
 //int bufferSensCount = 0;
 
 Sensor::Sensor(){
@@ -57,8 +61,8 @@ void Sensor::readSensors(){
     
     sens[i] = sensBitValue;
   }
-  loadLast();
-  bufferCopy(false);
+  //loadLast();
+  //bufferCopy(false);
 }
 
 void Sensor::bufferCopy(boolean bufferToSens){
@@ -71,14 +75,7 @@ void Sensor::bufferCopy(boolean bufferToSens){
   }
 }
 void Sensor::loadLast(){
-  boolean hasOne = false;
-  for(int i = 0; i < SENSOR_NUM; i++){
-    if(sens[i] == 1){
-      hasOne = true;
-      break;
-    }
-  }
-  if(!hasOne){
+  if(allSensIsZero(sens)){
     bufferCopy(true);
   }
 }
@@ -99,7 +96,7 @@ int Sensor::getRightBit(byte sensData[]){
       return i;
     }
   }
-  return SENSOR_NUM/2; //k�zepe
+  return SENSOR_NUM/2; //k�zepe
 }
 int Sensor::getLeftBit(byte sensData[]){
   for(int i=SENSOR_NUM-1; i>-1; i--){
@@ -107,24 +104,82 @@ int Sensor::getLeftBit(byte sensData[]){
       return i;
     }
   }
-  return SENSOR_NUM/2; //k�zepe
+  return SENSOR_NUM/2; //közepe
 }
-int Sensor::getMainBit(byte sensData[]){
-  int tempBit = getCorrectBit(sensData);
-  if(tempBit != -1){
-    return tempBit;
-  }else{
-    return getRightBit(sensData);
+int Sensor::getMainBit(){
+  if(nowLaneChange){
+    if(allSensIsZero(sens)){
+      nowLaneChange = false;
+      loadLast();
+    }else{
+      return laneChangeBit;
+    }
   }
+  if(getDifference(sens)){
+    laneChangeBit = getLaneChange();
+    if(laneChangeBit != -1){
+      return laneChangeBit;
+    }
+
+    //Ha a mostani adatban látni, hogy van különbség, de még nincs eldöntve akkor addig is az előző olyan indexet adja vissza amikor még csak egy érték volt 
+    int lastNorm = getLastNormalBufferIndex(0);
+    return getLeftBit(bufferSens[lastNorm]);
+  }
+  loadLast();
+  bufferCopy(false);
+  return getRightBit(sens);
 }
-int Sensor::getCorrectBit(byte sensData[]){
-  for (int i = 0; i<SENSOR_NUM; i++){
-    if(sensData[i] == 1 && bufferSens[0][i] == 1){
+int Sensor::getLaneChange(){
+  int diffCount = 0;
+  for (int i = 0; i< BUFFER_NUM; i++){
+    if(getDifference(bufferSens[i])){
+      diffCount++;
+    }
+    if(diffCount >= LANE_CHANGE_LIMIT){
+      int last = getLastNormalBufferIndex(i);
+      //laneChange true lesz mert most elkezdi a sávváltást. Addig kell truenak lennie amíg ki nem nullázódik aza aktuális érték
+      nowLaneChange = true; 
+      //addBufferbe az utolsó normális érték. FIGYELEM EZZEL VALÓSZÍNŰLEG EGYENESEN FOG MENNI.
+      addBuffer(bufferSens[last]);
+      /*
+       * Ekkor elvileg balra kéne mennie
+       */
+      if(getLeftBit(bufferSens[last]) > getLeftBit(bufferSens[0])){ 
+        return 1; //azért egy mert így olyan mintha ezt látná: {0,1,0,0,0,0,0,0,0} 
+      }
+      /*
+       * Ekkor meg jobbra, mert nem balra,de lehetne csekkolni hogy: if(getRightBit(bufferSens[last]) < getRightBit(bufferSens[0]))
+       */
+      else{
+        return 1; //azért egy mert így olyan mintha ezt látná: {0,0,0,0,0,0,0,1,0}
+      }
+    }
+  }
+  return -1; //ha -1 akkor nem kell sávot váltani.
+}
+/*
+ * Visszaadja, hogy a jobb illetve bal bit nem egyezik meg.
+ * Igaz akkor, ha különbség a két bit között nagyobb mint 1
+ */
+boolean Sensor::getDifference(byte sensData[]){
+  int leftBit = getLeftBit(sensData);
+  int rightBit = getRightBit(sensData);
+  int diff = leftBit - rightBit;
+  if(abs(diff) > 1){
+    return true;
+  }
+  return false;
+}
+
+int Sensor::getLastNormalBufferIndex(int last){
+  for (int i = last; i< BUFFER_NUM; i++){
+    if(!getDifference(bufferSens[i])){
       return i;
     }
   }
   return -1;
 }
+
 void Sensor::writeDatas(){
 
   for(int i = 0; i< SENSOR_NUM;i++){
@@ -132,6 +187,14 @@ void Sensor::writeDatas(){
   }
   Serial.println();
   
+}
+boolean Sensor::allSensIsZero(byte sensData[]){
+  for(int i = 0; i < SENSOR_NUM; i++){
+    if(sensData[i] == 1){
+      return false;
+    }
+  }
+  return true;
 }
 void Sensor::addBuffer(byte actualSensData[]){
 

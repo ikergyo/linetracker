@@ -28,8 +28,7 @@ ISR(TIMER5_OVF_vect){
   sensor.readSensors();
   sensor.writeDatas();
 
-  int rpm = pid.LineTrackingControl(sensor.getMainBit(sensor.sens)*10,40.0);
-
+  int rpm = pid.LineTrackingControl(sensor.getMainBit()*10,40.0);
 
   int R_rpm = base_rpm-rpm;
   if (R_rpm <0) R_rpm =0;
