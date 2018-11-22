@@ -115,7 +115,7 @@ int Sensor::getMainBit(){
       return laneChangeBit;
     }
   }
-  if(getDifference(sens)){
+  if(getDifferenceWithZero(sens)){
     laneChangeBit = getLaneChange();
     if(laneChangeBit != -1){
       return laneChangeBit;
@@ -132,7 +132,7 @@ int Sensor::getMainBit(){
 int Sensor::getLaneChange(){
   int diffCount = 0;
   for (int i = 0; i< BUFFER_NUM; i++){
-    if(getDifference(bufferSens[i])){
+    if(getDifferenceWithZero(bufferSens[i])){
       diffCount++;
     }
     if(diffCount >= LANE_CHANGE_LIMIT){
@@ -159,21 +159,39 @@ int Sensor::getLaneChange(){
 }
 /*
  * Visszaadja, hogy a jobb illetve bal bit nem egyezik meg.
- * Igaz akkor, ha különbség a két bit között nagyobb mint 1
+ * Igaz akkor, ha különbség a két bit között nagyobb mint 1 és van közöttük 0
+ */
+boolean Sensor::getDifferenceWithZero(byte sensData[]){
+  int leftBit = getLeftBit(sensData);
+  int rightBit = getRightBit(sensData);
+  int diff = leftBit - rightBit;
+  if(abs(diff) > 1){
+    for(int i = leftBit; i < rightBit;i++){
+      if(sensData[i] == 0){
+        return true;
+      }
+    }
+    
+  }
+  return false;
+}
+/**
+ * Igaz akkor, ha a két bit között több mint egy hely van.
  */
 boolean Sensor::getDifference(byte sensData[]){
   int leftBit = getLeftBit(sensData);
   int rightBit = getRightBit(sensData);
   int diff = leftBit - rightBit;
   if(abs(diff) > 1){
-    return true;
+        return true;
+
   }
   return false;
 }
 
 int Sensor::getLastNormalBufferIndex(int last){
   for (int i = last; i< BUFFER_NUM; i++){
-    if(!getDifference(bufferSens[i])){
+    if(!getDifferenceWithZero(bufferSens[i])){
       return i;
     }
   }
