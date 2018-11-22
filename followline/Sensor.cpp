@@ -274,7 +274,7 @@ boolean Sensor::allSensIsOne(byte sensData[]){
 }
 void Sensor::addBuffer(byte actualSensData[]){
 
-  memcpy(bufferSens[1],bufferSens[0], SENSOR_NUM*(BUFFER_NUM-1)*sizeof(byte));
+  memmove(bufferSens[1],bufferSens[0], SENSOR_NUM*(BUFFER_NUM-1)*sizeof(byte));
   for(int i = 0; i<SENSOR_NUM; i++){
  //   bufferSens[bufferSensCount][i] = actualSensData[i];
     bufferSens[0][i] = actualSensData[i];
