@@ -23,6 +23,9 @@
 
 #define SENSOR_NUM 9
 #define BUFFER_NUM 50
+#define SENSOR_START_LIMIT 5
+#define STOP_LIMIT 10
+
 #define LANE_CHANGE_LIMIT 25 //Mennyi kell ahhoz, hogy sávot váltson.
 class Sensor
 {
@@ -34,7 +37,8 @@ class Sensor
     void readSensors();
     void writeDatas();
     float sensorIndexAvarage();
-    
+    boolean needToStop();
+    boolean needToStart();
     int getMainBit();
       
   private:
@@ -46,6 +50,8 @@ class Sensor
     boolean getDifference(byte sensData[]);
     int getLastNormalBufferIndex(int last);
     boolean allSensIsZero(byte sensData[]);
+    boolean allSensIsOne(byte sensData[]);
+    boolean isThisY(byte sensData[]);
     void addBuffer(byte actualSensData[]);
     void bufferCopy(boolean bufferToSens);
 };

@@ -107,6 +107,10 @@ int Sensor::getLeftBit(byte sensData[]){
   return SENSOR_NUM/2; //közepe
 }
 int Sensor::getMainBit(){
+  if(isThisY(sens)){
+    bufferCopy(false);
+    return getRightBit(sens);
+  }
   if(nowLaneChange){
     if(allSensIsZero(sens)){
       nowLaneChange = false;
@@ -115,7 +119,7 @@ int Sensor::getMainBit(){
       return laneChangeBit;
     }
   }
-  if(getDifferenceWithZero(sens)){
+  if(getDifference(sens)){
     laneChangeBit = getLaneChange();
     if(laneChangeBit != -1){
       return laneChangeBit;
@@ -188,7 +192,53 @@ boolean Sensor::getDifference(byte sensData[]){
   }
   return false;
 }
-
+/**
+ * Akkor Y, ha a legszélső senzor bejelez, és a bal valamint jobb bit között legalább két 0 van
+ */
+boolean Sensor::isThisY(byte sensData[]){
+  if(getDifference(sensData)){
+    int leftBit = getLeftBit(sensData);
+    int rightBit = getRightBit(sensData);
+    if(rightBit == SENSOR_NUM-1){
+      int zeroNum = 0;
+      for(int i=leftBit; i < rightBit; i++){
+        if(sensData[i] == 0){
+          zeroNum++;
+        }
+      }
+      if(zeroNum >= 2){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+/**
+ * Akkor kell megállnia ha az aktuális értékek 0-k de volt a bufferben olyan, hogy mind 1.
+ * Az, hogy az utolsó hány értéket vizsgálja az a STOP_LIMIT
+ */
+boolean Sensor::needToStop(){
+  if(allSensIsZero(sens)){
+    for(int i=0; i < STOP_LIMIT; i++){
+      if(allSensIsOne(bufferSens[i])){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+boolean Sensor::needToStart(){
+  int oneNum = 0;
+  for(int i = 0; i< SENSOR_NUM;i++){
+    if(sens[i] == 1){
+      oneNum++;
+    }
+  }
+  if(oneNum>=SENSOR_START_LIMIT){
+    return true;
+  }
+  return false;
+}
 int Sensor::getLastNormalBufferIndex(int last){
   for (int i = last; i< BUFFER_NUM; i++){
     if(!getDifferenceWithZero(bufferSens[i])){
@@ -209,6 +259,14 @@ void Sensor::writeDatas(){
 boolean Sensor::allSensIsZero(byte sensData[]){
   for(int i = 0; i < SENSOR_NUM; i++){
     if(sensData[i] == 1){
+      return false;
+    }
+  }
+  return true;
+}
+boolean Sensor::allSensIsOne(byte sensData[]){
+  for(int i = 0; i < SENSOR_NUM; i++){
+    if(sensData[i] == 0){
       return false;
     }
   }
