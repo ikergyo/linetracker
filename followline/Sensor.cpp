@@ -3,7 +3,7 @@
 #include "Sensor.h"
 
 
-const int limitLine = 600;
+const int limitLine = 700;
 
 int pureSens[SENSOR_NUM];
 boolean nowLaneChange = false;
@@ -107,19 +107,26 @@ int Sensor::getLeftBit(byte sensData[]){
   return SENSOR_NUM/2; //közepe
 }
 int Sensor::getMainBit(){
+
   if(isThisY(sens)){
+    Serial.println("Y");
     bufferCopy(false);
     return getRightBit(sens);
   }
   if(nowLaneChange){
+
     if(allSensIsZero(sens)){
+     
       nowLaneChange = false;
-      loadLast();
+      createSens(SENSOR_NUM/2);
+      bufferCopy(false);
+      return SENSOR_NUM/2;
     }else{
       return laneChangeBit;
     }
   }
   if(getDifference(sens)){
+    bufferCopy(false);
     laneChangeBit = getLaneChange();
     if(laneChangeBit != -1){
       return laneChangeBit;
@@ -139,23 +146,30 @@ int Sensor::getLaneChange(){
     if(getDifferenceWithZero(bufferSens[i])){
       diffCount++;
     }
+
     if(diffCount >= LANE_CHANGE_LIMIT){
+      
       int last = getLastNormalBufferIndex(i);
+      writeDatas(bufferSens[0]);
+      writeDatas(bufferSens[last]);
       //laneChange true lesz mert most elkezdi a sávváltást. Addig kell truenak lennie amíg ki nem nullázódik aza aktuális érték
       nowLaneChange = true; 
       //addBufferbe az utolsó normális érték. FIGYELEM EZZEL VALÓSZÍNŰLEG EGYENESEN FOG MENNI.
-      addBuffer(bufferSens[last]);
+      //addBuffer(bufferSens[last]);
       /*
        * Ekkor elvileg balra kéne mennie
        */
-      if(getLeftBit(bufferSens[last]) > getLeftBit(bufferSens[0])){ 
-        return 1; //azért egy mert így olyan mintha ezt látná: {0,1,0,0,0,0,0,0,0} 
+      if(getLeftBit(bufferSens[last]) < getLeftBit(bufferSens[0])){ 
+        Serial.println("Bal");
+        return SENSOR_NUM - 1; //azért egy mert így olyan mintha ezt látná: {0,1,0,0,0,0,0,0,0} 
+        
       }
       /*
        * Ekkor meg jobbra, mert nem balra,de lehetne csekkolni hogy: if(getRightBit(bufferSens[last]) < getRightBit(bufferSens[0]))
        */
       else{
-        return 1; //azért egy mert így olyan mintha ezt látná: {0,0,0,0,0,0,0,1,0}
+        Serial.println("Jobb");
+        return 0; //azért egy mert így olyan mintha ezt látná: {0,0,0,0,0,0,0,1,0}
       }
     }
   }
@@ -170,8 +184,9 @@ boolean Sensor::getDifferenceWithZero(byte sensData[]){
   int rightBit = getRightBit(sensData);
   int diff = leftBit - rightBit;
   if(abs(diff) > 1){
-    for(int i = leftBit; i < rightBit;i++){
+    for(int i = rightBit; i < leftBit; i++){
       if(sensData[i] == 0){
+        
         return true;
       }
     }
@@ -201,12 +216,12 @@ boolean Sensor::isThisY(byte sensData[]){
     int rightBit = getRightBit(sensData);
     if(rightBit == SENSOR_NUM-1){
       int zeroNum = 0;
-      for(int i=leftBit; i < rightBit; i++){
+      for(int i=rightBit; i < leftBit; i++){
         if(sensData[i] == 0){
           zeroNum++;
         }
       }
-      if(zeroNum >= 2){
+      if(zeroNum >= 3){
         return true;
       }
     }
@@ -227,6 +242,15 @@ boolean Sensor::needToStop(){
   }
   return false;
 }
+void Sensor::createSens(int indexWhereIsTheOne){
+  for(int i = 0; i < SENSOR_NUM; i++){
+    if(indexWhereIsTheOne == i){
+      sens[i] = 1;
+    }else{
+      sens[i] = 0;
+    }
+  }
+}
 boolean Sensor::needToStart(){
   int oneNum = 0;
   for(int i = 0; i< SENSOR_NUM;i++){
@@ -245,13 +269,13 @@ int Sensor::getLastNormalBufferIndex(int last){
       return i;
     }
   }
-  return -1;
+  return SENSOR_NUM/2;
 }
 
-void Sensor::writeDatas(){
+void Sensor::writeDatas(byte sensData[]){
 
   for(int i = 0; i< SENSOR_NUM;i++){
-    Serial.print(sens[i]);
+    Serial.print(sensData[i]);
   }
   Serial.println();
   

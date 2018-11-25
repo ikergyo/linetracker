@@ -35,7 +35,7 @@ class Sensor
     byte bufferSens[BUFFER_NUM][SENSOR_NUM];
     void Setup();
     void readSensors();
-    void writeDatas();
+    void writeDatas(byte sensData[]);
     float sensorIndexAvarage();
     boolean needToStop();
     boolean needToStart();
@@ -53,6 +53,7 @@ class Sensor
     boolean allSensIsOne(byte sensData[]);
     boolean isThisY(byte sensData[]);
     void addBuffer(byte actualSensData[]);
+    void createSens(int indexWhereIsTheOne);
     void bufferCopy(boolean bufferToSens);
 };
 

@@ -6,10 +6,11 @@
 
 boolean moveState = false;
 boolean IR_read;
-int base_rpm = 185;
+int base_rpm = 125;
 
 int onTime = 0;
 void setup() {
+
   // put your setup code here, to run once:
   sensor.Setup();
   motor.Setup();
@@ -28,7 +29,7 @@ ISR(TIMER5_OVF_vect){
   IR_read = true;
 
   sensor.readSensors();
-  sensor.writeDatas();
+  //sensor.writeDatas(sensor.sens);
   if(!moveState && sensor.needToStart()){
     moveState = true; 
   }
@@ -38,7 +39,10 @@ ISR(TIMER5_OVF_vect){
       motor.setLeftVelocity(0);
       motor.setRightVelocity(0);
     }else{
-      int rpm = pid.LineTrackingControl(sensor.getMainBit()*10,40.0);
+      
+      int mainBit = sensor.getMainBit();
+      //Serial.println(mainBit);
+      int rpm = pid.LineTrackingControl(mainBit*10,40.0);
     
       int R_rpm = base_rpm-rpm;
       if (R_rpm <0) R_rpm =0;
