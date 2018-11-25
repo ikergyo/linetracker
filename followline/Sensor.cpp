@@ -3,10 +3,13 @@
 #include "Sensor.h"
 
 
-const int limitLine = 700;
+const int limitLine = 650;
+const int laneChangeValue = 2;
 
 int pureSens[SENSOR_NUM];
 boolean nowLaneChange = false;
+boolean leftLaneChange = false;
+boolean rightLaneChange = false;
 int laneChangeBit = -1;
 /*
 byte sens[SENSOR_NUM];
@@ -113,6 +116,7 @@ int Sensor::getMainBit(){
     bufferCopy(false);
     return getRightBit(sens);
   }
+  
   if(nowLaneChange){
 
     if(allSensIsZero(sens)){
@@ -125,6 +129,20 @@ int Sensor::getMainBit(){
       return laneChangeBit;
     }
   }
+  if(leftLaneChange){
+    if(allSensIsZero(sens)){
+      return SENSOR_NUM -laneChangeValue;
+    }else{
+      leftLaneChange = false;
+    }
+  }else if(rightLaneChange){
+    if(allSensIsZero(sens)){
+      return laneChangeValue;
+    }else{
+      rightLaneChange = false;
+    }
+  }
+  
   if(getDifference(sens)){
     bufferCopy(false);
     laneChangeBit = getLaneChange();
@@ -161,6 +179,7 @@ int Sensor::getLaneChange(){
        */
       if(getLeftBit(bufferSens[last]) < getLeftBit(bufferSens[0])){ 
         Serial.println("Bal");
+        leftLaneChange = true;
         return SENSOR_NUM - 1; //azért egy mert így olyan mintha ezt látná: {0,1,0,0,0,0,0,0,0} 
         
       }
@@ -169,6 +188,7 @@ int Sensor::getLaneChange(){
        */
       else{
         Serial.println("Jobb");
+        rightLaneChange = true;
         return 0; //azért egy mert így olyan mintha ezt látná: {0,0,0,0,0,0,0,1,0}
       }
     }
@@ -214,7 +234,7 @@ boolean Sensor::isThisY(byte sensData[]){
   if(getDifference(sensData)){
     int leftBit = getLeftBit(sensData);
     int rightBit = getRightBit(sensData);
-    if(rightBit == SENSOR_NUM-1){
+    if(rightBit == 0){
       int zeroNum = 0;
       for(int i=rightBit; i < leftBit; i++){
         if(sensData[i] == 0){
