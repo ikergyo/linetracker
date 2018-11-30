@@ -111,11 +111,11 @@ int Sensor::getLeftBit(byte sensData[]){
 }
 int Sensor::getMainBit(){
 
-  if(isThisY(sens)){
+  /*if(isThisY(sens)){
     Serial.println("Y");
     bufferCopy(false);
     return getRightBit(sens);
-  }
+  }*/
   
   if(nowLaneChange){
 
@@ -152,7 +152,7 @@ int Sensor::getMainBit(){
 
     //Ha a mostani adatban látni, hogy van különbség, de még nincs eldöntve akkor addig is az előző olyan indexet adja vissza amikor még csak egy érték volt 
     int lastNorm = getLastNormalBufferIndex(0);
-    return getLeftBit(bufferSens[lastNorm]);
+    return getRightBit(sens);
   }
   loadLast();
   bufferCopy(false);
@@ -160,9 +160,18 @@ int Sensor::getMainBit(){
 }
 int Sensor::getLaneChange(){
   int diffCount = 0;
+  int lastDiff = 0;
   for (int i = 0; i< BUFFER_NUM; i++){
-    if(getDifferenceWithZero(bufferSens[i])){
-      diffCount++;
+    int diff = getDifferenceWithZero(bufferSens[i]);
+    if(diff != -1){
+      if(lastDiff == diff){ //Tehát ha ugyanannyi a különbség mint az előzőnél akkor ++
+         diffCount++;
+      }else{
+        diffCount++;
+      }
+      lastDiff = diff;
+    }else{
+      diffCount = 0; //Ez ahhoz kell, hogy egymás után legyen ennyi
     }
 
     if(diffCount >= LANE_CHANGE_LIMIT){
@@ -177,7 +186,7 @@ int Sensor::getLaneChange(){
       /*
        * Ekkor elvileg balra kéne mennie
        */
-      if(getLeftBit(bufferSens[last]) < getLeftBit(bufferSens[0])){ 
+      if(getLeftBit(bufferSens[last]) < getLeftBit(bufferSens[last-1])){ 
         Serial.println("Bal");
         leftLaneChange = true;
         return SENSOR_NUM - 1; //azért egy mert így olyan mintha ezt látná: {0,1,0,0,0,0,0,0,0} 
@@ -198,8 +207,10 @@ int Sensor::getLaneChange(){
 /*
  * Visszaadja, hogy a jobb illetve bal bit nem egyezik meg.
  * Igaz akkor, ha különbség a két bit között nagyobb mint 1 és van közöttük 0
+ * 
  */
-boolean Sensor::getDifferenceWithZero(byte sensData[]){
+ //TODO: Lehet kell rajta javitani vagy nem ezt használni mert lehet nincs 0 sávváltásnál a két érték között.
+int Sensor::getDifferenceWithZero(byte sensData[]){
   int leftBit = getLeftBit(sensData);
   int rightBit = getRightBit(sensData);
   int diff = leftBit - rightBit;
@@ -207,12 +218,12 @@ boolean Sensor::getDifferenceWithZero(byte sensData[]){
     for(int i = rightBit; i < leftBit; i++){
       if(sensData[i] == 0){
         
-        return true;
+        return abs(diff);
       }
     }
     
   }
-  return false;
+  return -1;
 }
 /**
  * Igaz akkor, ha a két bit között több mint egy hely van.
@@ -285,7 +296,7 @@ boolean Sensor::needToStart(){
 }
 int Sensor::getLastNormalBufferIndex(int last){
   for (int i = last; i< BUFFER_NUM; i++){
-    if(!getDifferenceWithZero(bufferSens[i])){
+    if(getDifferenceWithZero(bufferSens[i]) == -1){
       return i;
     }
   }

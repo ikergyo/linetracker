@@ -46,7 +46,7 @@ class Sensor
     int getRightBit(byte sensData[]); 
     int getLeftBit(byte sensData[]);
     int getLaneChange();
-    boolean getDifferenceWithZero(byte sensData[]);
+    int getDifferenceWithZero(byte sensData[]);
     boolean getDifference(byte sensData[]);
     int getLastNormalBufferIndex(int last);
     boolean allSensIsZero(byte sensData[]);
