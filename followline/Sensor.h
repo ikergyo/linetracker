@@ -22,11 +22,11 @@
 #define SD9 52
 
 #define SENSOR_NUM 9
-#define BUFFER_NUM 50
+#define BUFFER_NUM 100
 #define SENSOR_START_LIMIT 5
 #define STOP_LIMIT 10
 
-#define LANE_CHANGE_LIMIT 25 //Mennyi kell ahhoz, hogy sávot váltson.
+#define LANE_CHANGE_LIMIT 35 //Mennyi kell ahhoz, hogy sávot váltson.
 class Sensor
 {
   public:

@@ -5,12 +5,14 @@
 
 const int limitLine = 650;
 const int laneChangeValue = 2;
+const int neededRotateTimeForLaneChangeLIMIT = 10;
 
 int pureSens[SENSOR_NUM];
 boolean nowLaneChange = false;
 boolean leftLaneChange = false;
 boolean rightLaneChange = false;
 int laneChangeBit = -1;
+int neededRotateTimeForLaneChange = 0;
 /*
 byte sens[SENSOR_NUM];
 byte bufferSens[BUFFER_NUM][SENSOR_NUM];
@@ -131,14 +133,33 @@ int Sensor::getMainBit(){
   }
   if(leftLaneChange){
     if(allSensIsZero(sens)){
-      return SENSOR_NUM -laneChangeValue;
+      if(neededRotateTimeForLaneChange<neededRotateTimeForLaneChangeLIMIT)
+      {
+        neededRotateTimeForLaneChange++;
+        int tempIndex = SENSOR_NUM - laneChangeValue;
+        createSens(tempIndex);
+        bufferCopy(false);
+        return tempIndex;
+      }else{
+        return SENSOR_NUM/2;
+      }
     }else{
+      neededRotateTimeForLaneChange = 0;
       leftLaneChange = false;
     }
   }else if(rightLaneChange){
-    if(allSensIsZero(sens)){
-      return laneChangeValue;
+    if(allSensIsZero(sens)){ //Ez ahhoz kell, hogy fordulás után egyenesen menjen. A Limittel lehet állitani, hogy mennyi ideig forduljon
+      if(neededRotateTimeForLaneChange<neededRotateTimeForLaneChangeLIMIT)
+      {
+        neededRotateTimeForLaneChange++;
+        createSens(laneChangeValue);
+        bufferCopy(false);
+        return laneChangeValue;
+      }else{
+        return SENSOR_NUM/2;
+      }
     }else{
+      neededRotateTimeForLaneChange = 0;
       rightLaneChange = false;
     }
   }
