@@ -4,8 +4,8 @@
 
 
 const int limitLine = 650;
-const int laneChangeValue = 2;
-const int neededRotateTimeForLaneChangeLIMIT = 10;
+const int laneChangeValue = 1;
+const int neededRotateTimeForLaneChangeLIMIT = 90;
 
 int pureSens[SENSOR_NUM];
 boolean nowLaneChange = false;
@@ -112,17 +112,8 @@ int Sensor::getLeftBit(byte sensData[]){
   return SENSOR_NUM/2; //közepe
 }
 int Sensor::getMainBit(){
-
-  /*if(isThisY(sens)){
-    Serial.println("Y");
-    bufferCopy(false);
-    return getRightBit(sens);
-  }*/
-  
   if(nowLaneChange){
-
     if(allSensIsZero(sens)){
-     
       nowLaneChange = false;
       createSens(SENSOR_NUM/2);
       bufferCopy(false);
@@ -133,7 +124,7 @@ int Sensor::getMainBit(){
   }
   if(leftLaneChange){
     if(allSensIsZero(sens)){
-      if(neededRotateTimeForLaneChange<neededRotateTimeForLaneChangeLIMIT)
+      if(neededRotateTimeForLaneChange < neededRotateTimeForLaneChangeLIMIT)
       {
         neededRotateTimeForLaneChange++;
         int tempIndex = SENSOR_NUM - laneChangeValue;
@@ -149,7 +140,7 @@ int Sensor::getMainBit(){
     }
   }else if(rightLaneChange){
     if(allSensIsZero(sens)){ //Ez ahhoz kell, hogy fordulás után egyenesen menjen. A Limittel lehet állitani, hogy mennyi ideig forduljon
-      if(neededRotateTimeForLaneChange<neededRotateTimeForLaneChangeLIMIT)
+      if(neededRotateTimeForLaneChange < neededRotateTimeForLaneChangeLIMIT)
       {
         neededRotateTimeForLaneChange++;
         createSens(laneChangeValue);
@@ -164,15 +155,18 @@ int Sensor::getMainBit(){
     }
   }
   
-  if(getDifference(sens)){
-    bufferCopy(false);
+  if(allSensIsZero(sens)){
+    //bufferCopy(false);
     laneChangeBit = getLaneChange();
     if(laneChangeBit != -1){
+      createSens(laneChangeBit);
+      bufferCopy(false);
       return laneChangeBit;
     }
 
     //Ha a mostani adatban látni, hogy van különbség, de még nincs eldöntve akkor addig is az előző olyan indexet adja vissza amikor még csak egy érték volt 
-    int lastNorm = getLastNormalBufferIndex(0);
+    //int lastNorm = getLastNormalBufferIndex(0);
+    loadLast();
     return getRightBit(sens);
   }
   loadLast();
@@ -185,12 +179,14 @@ int Sensor::getLaneChange(){
   for (int i = 0; i< BUFFER_NUM; i++){
     int diff = getDifferenceWithZero(bufferSens[i]);
     if(diff != -1){
-      if(lastDiff == diff){ //Tehát ha ugyanannyi a különbség mint az előzőnél akkor ++
+      //Tehát ha ugyanannyi a különbség mint az előzőnél akkor ++
+      /**if(lastDiff == diff){ 
          diffCount++;
       }else{
-        diffCount++;
-      }
-      lastDiff = diff;
+        diffCount=0;
+      }*/
+      diffCount++;
+      //lastDiff = diff;
     }else{
       diffCount = 0; //Ez ahhoz kell, hogy egymás után legyen ennyi
     }
@@ -198,7 +194,7 @@ int Sensor::getLaneChange(){
     if(diffCount >= LANE_CHANGE_LIMIT){
       
       int last = getLastNormalBufferIndex(i);
-      writeDatas(bufferSens[0]);
+      writeDatas(bufferSens[last-1]);
       writeDatas(bufferSens[last]);
       //laneChange true lesz mert most elkezdi a sávváltást. Addig kell truenak lennie amíg ki nem nullázódik aza aktuális érték
       nowLaneChange = true; 

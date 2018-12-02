@@ -26,7 +26,7 @@
 #define SENSOR_START_LIMIT 5
 #define STOP_LIMIT 10
 
-#define LANE_CHANGE_LIMIT 35 //Mennyi kell ahhoz, hogy sávot váltson.
+#define LANE_CHANGE_LIMIT 15 //Mennyi kell ahhoz, hogy sávot váltson.
 class Sensor
 {
   public:

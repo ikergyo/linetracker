@@ -13,7 +13,7 @@ class PID{
     double kp=3;
 
     double ki=0;
-    double kd=0;
+    double kd=2;
 };
 
 extern PID pid;

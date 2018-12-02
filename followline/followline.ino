@@ -6,7 +6,7 @@
 
 boolean moveState = false;
 boolean IR_read;
-int base_rpm = 125;
+int base_rpm = 120;
 
 int onTime = 0;
 void setup() {
