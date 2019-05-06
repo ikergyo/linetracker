@@ -17,6 +17,9 @@ class Motor
     void setLeftVelocity(byte velocity); 
     void setRightRotDirection(boolean forward);
     void setLeftRotDirection(boolean forward);
+    void turnLeft(byte velocity);
+    void turnRight(byte velocity);
+    void goForward(byte velocity);
       
   private:
     void loadLast(); 

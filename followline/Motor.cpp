@@ -41,4 +41,25 @@ void Motor::setRightVelocity(byte velocity){
   analogWrite(enB, velocity);
 }
 
+void Motor::turnLeft(byte velocity){
+  setLeftVelocity(velocity);
+  setRightVelocity(velocity);
+  setLeftRotDirection(false);
+  setRightRotDirection(true);
+}
+
+void Motor::turnRight(byte velocity){
+  setLeftVelocity(velocity);
+  setRightVelocity(velocity);
+  setLeftRotDirection(true);
+  setRightRotDirection(false);
+}
+
+void Motor::goForward(byte velocity){
+  setLeftVelocity(velocity);
+  setRightVelocity(velocity);
+  setLeftRotDirection(true);
+  setRightRotDirection(true);
+}
+
 Motor motor = Motor();
