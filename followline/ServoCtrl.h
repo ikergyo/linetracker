@@ -1,22 +1,25 @@
+
 #ifndef ServoCtrl_h
 #define ServoCtrl_h
 
 #include <Servo.h>
-#define SERVO_PIN 9
+#define SERVO_PIN 8
 
 class ServoCtrl
 {
-  boolean rotating;
-  int waitCycle;
-  int actualAngle;
-  
 public:
-  ServoCtrl();
+  void Setup();
   void update();
   boolean isRotating();
   void setAngle(int angle);
   int getAngle();
-};
+  int readOut();
 
+private: 
+  boolean rotating;
+  int waitCycle;
+  int actualAngle;
+  
+};
 extern ServoCtrl servoCtrl;
 #endif

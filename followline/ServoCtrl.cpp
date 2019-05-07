@@ -1,16 +1,16 @@
+
 #include "Arduino.h"
 #include "ServoCtrl.h"
 #include <math.h>
-
 Servo servo;
 
-ServoCtrl::ServoCtrl(){
+void ServoCtrl::Setup(){
     rotating = false;
     waitCycle = 0;
     actualAngle = 90;
     servo.attach(SERVO_PIN);
+    setAngle(90);
 }
-  
 void ServoCtrl::update(){
     if(waitCycle > 0)
       waitCycle--;
@@ -32,11 +32,13 @@ void ServoCtrl::setAngle(int angle){
       waitCycle = abs(angle-actualAngle) / 5;
       actualAngle = angle;
       servo.write(angle);
-    }
+
+   }
 }
 
 int ServoCtrl::getAngle(){
   return actualAngle;
 }
 
-ServoCtrl servoCtrl;
+
+ServoCtrl servoCtrl = ServoCtrl();

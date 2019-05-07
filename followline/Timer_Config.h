@@ -1,1 +1,1 @@
-void initTimer5();
+void initTimer1();

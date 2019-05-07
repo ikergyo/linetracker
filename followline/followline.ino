@@ -3,7 +3,8 @@
 #include "Motor.h"
 #include "PID.h"
 #include "Timer_Config.h"
-#include "ServoCtrl.H"
+#include "ServoCtrl.h"
+#include "SonarCtrl.h"
 
 
 boolean moveState = false;
@@ -17,7 +18,9 @@ void setup() {
   // put your setup code here, to run once:
   sensor.Setup();
   motor.Setup();
-  initTimer5();
+  servoCtrl.Setup();
+  sonarCtrl.Setup();
+  initTimer1();
   motor.setLeftRotDirection(true);
   motor.setRightRotDirection(true);
 }
@@ -27,16 +30,17 @@ void loop() {
 }
 
 //timer configba
-ISR(TIMER5_OVF_vect){
+ISR(TIMER1_OVF_vect){
 
   IR_read = true;
-
+  
   sensor.readSensors();
+  TCNT1 = 65535-20000;
   //sensor.writeDatas(sensor.sens);
-
+  
   if (obstacleCourse){
     servoCtrl.update();
-    TCNT5 = 65535-20000;
+    sonarCtrl.getMeasure();
   } else {
     if(!moveState && sensor.needToStart()){
       moveState = true; 
@@ -44,6 +48,7 @@ ISR(TIMER5_OVF_vect){
     if(moveState){
       if(sensor.needToStop()){
         moveState = false;
+        obstacleCourse = true;
         motor.setLeftVelocity(0);
         motor.setRightVelocity(0);
       }else{
@@ -62,8 +67,6 @@ ISR(TIMER5_OVF_vect){
        motor.setLeftVelocity(L_rpm);
      
        motor.setRightVelocity(R_rpm);
-  
-        TCNT5 = 65535-20000;
      }
    }
   }
