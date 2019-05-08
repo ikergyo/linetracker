@@ -5,6 +5,7 @@
 #include "Timer_Config.h"
 #include "ServoCtrl.h"
 #include "SonarCtrl.h"
+#include "MpuCtrl.h"
 
 
 boolean moveState = false;
@@ -16,6 +17,7 @@ int onTime = 0;
 void setup() {
 
   // put your setup code here, to run once:
+  mpuCtrl.Setup();
   sensor.Setup();
   motor.Setup();
   servoCtrl.Setup();
@@ -41,6 +43,8 @@ ISR(TIMER1_OVF_vect){
   if (obstacleCourse){
     servoCtrl.update();
     sonarCtrl.getMeasure();
+    mpuCtrl.readAndProcessGyroData();
+    
   } else {
     if(!moveState && sensor.needToStart()){
       moveState = true; 
@@ -51,6 +55,7 @@ ISR(TIMER1_OVF_vect){
         obstacleCourse = true;
         motor.setLeftVelocity(0);
         motor.setRightVelocity(0);
+        
       }else{
       
         int mainBit = sensor.getMainBit();
