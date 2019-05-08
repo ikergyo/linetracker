@@ -71,7 +71,7 @@ ISR(TIMER1_OVF_vect){
             servoCtrl.setAngle(servoCtrl.getAngle()+searchingValue);
             if(sonarCtrl.getActualValue() < obstacleLimitInSearching) //megvan az irány
             {
-              absoluteAngle = sonarCtrl.getActualValue() + mpuCtrl.getAngleZ() - 90;
+              absoluteAngle = servoCtrl.getAngle() + mpuCtrl.getAngleZ() - 90;
             }
           }
         }
@@ -85,7 +85,7 @@ ISR(TIMER1_OVF_vect){
             servoCtrl.setAngle(servoCtrl.getAngle()-searchingValue);
             if(sonarCtrl.getActualValue() < obstacleLimitInSearching) //megvan az irány
             {
-              absoluteAngle = sonarCtrl.getActualValue() + mpuCtrl.getAngleZ() - 90;
+              absoluteAngle = servoCtrl.getAngle() + mpuCtrl.getAngleZ() - 90;
             }
           }
         }

@@ -29,7 +29,7 @@ void ServoCtrl::setAngle(int angle){
       if (angle < 5)
         angle = 5;
       rotating = true;
-      waitCycle = abs(angle-actualAngle) / 5;
+      waitCycle = abs(angle-actualAngle) / 5 + 1;
       actualAngle = angle;
       servo.write(angle);
 
