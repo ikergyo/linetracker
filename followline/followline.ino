@@ -18,6 +18,7 @@ boolean searchingStateRight = false;
 int searchingValue = 10;
 int searchingLimitLeft = 180; //90 + 180
 int searchingLimitRight = 0;
+int obstacleLimitInSearching = 50;
 
 float absoluteAngle=0;
 

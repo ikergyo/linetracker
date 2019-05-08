@@ -11,7 +11,7 @@ public:
   void readAndProcessGyroData();
   void getGyroValues();
   void calculateAngle();
-  void getAngleZ();
+  float getAngleZ();
   void printData();
 
 private: 

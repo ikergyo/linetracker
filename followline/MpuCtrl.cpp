@@ -88,7 +88,7 @@ void MpuCtrl::calculateAngle() {
   angelZ = angelZ + ((timePresent - timePast)*(gyroZPresent + gyroZPast - 2*gyroZCalli)) * 0.00000382;
 }
 
-void MpuCtrl::getAngleZ(){
+float MpuCtrl::getAngleZ(){
   return angelZ;
 }
 
