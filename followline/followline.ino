@@ -9,7 +9,18 @@
 
 
 boolean moveState = false;
-boolean obstacleCourse = true;
+boolean obstacleCourse = false;
+
+//Searchingstate values
+boolean searchingState = false;
+boolean searchingStateLeft = false;
+boolean searchingStateRight = false;
+int searchingValue = 10;
+int searchingLimitLeft = 180; //90 + 180
+int searchingLimitRight = 0;
+
+float absoluteAngle=0;
+
 boolean IR_read;
 int base_rpm = 120;
 
@@ -30,20 +41,56 @@ void setup() {
 void loop() {
 
 }
+void stopCar(){
+  motor.setLeftVelocity(0);
+  motor.setRightVelocity(0);
+}
 
 //timer configba
 ISR(TIMER1_OVF_vect){
-
-  IR_read = true;
-  
-  sensor.readSensors();
   TCNT1 = 65535-20000;
+  
+  IR_read = true;
+  sensor.readSensors();
   //sensor.writeDatas(sensor.sens);
   
   if (obstacleCourse){
     servoCtrl.update();
     sonarCtrl.getMeasure();
     mpuCtrl.readAndProcessGyroData();
+
+    if(searchingState)
+    {
+      stopCar();
+      if(searchingStateLeft)
+      {
+        if(sonarCtrl.dataIsHot && !servoCtrl.isRotating()) //Ha épp jött adat a sonartól
+        { 
+          if(servoCtrl.getAngle()+searchingValue <= searchingLimitLeft)
+          {
+            servoCtrl.setAngle(servoCtrl.getAngle()+searchingValue);
+            if(sonarCtrl.getActualValue() < obstacleLimitInSearching) //megvan az irány
+            {
+              absoluteAngle = sonarCtrl.getActualValue() + mpuCtrl.getAngleZ() - 90;
+            }
+          }
+        }
+      }
+      else if(searchingStateRight)
+      {
+        if(sonarCtrl.dataIsHot && !servoCtrl.isRotating()) //Ha épp jött adat a sonartól
+        { 
+          if(servoCtrl.getAngle()-searchingValue >= searchingLimitRight)
+          {
+            servoCtrl.setAngle(servoCtrl.getAngle()-searchingValue);
+            if(sonarCtrl.getActualValue() < obstacleLimitInSearching) //megvan az irány
+            {
+              absoluteAngle = sonarCtrl.getActualValue() + mpuCtrl.getAngleZ() - 90;
+            }
+          }
+        }
+      }
+    }
     
   } else {
     if(!moveState && sensor.needToStart()){

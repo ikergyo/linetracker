@@ -7,7 +7,10 @@ void SonarCtrl::Setup(){
   cycleCounter=0;
   distance = 0;
   duration = 0;
-
+  obstacleLimitFirst = 45;
+  obstacleLimitInBadDirection = 55;
+  obstacleLimitInSearching = 60;
+  dataIsHot = false;
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 }
@@ -29,14 +32,12 @@ void SonarCtrl::getMeasure(){
     distance = duration/58.2;
   
     if(distance >= maximumRange || distance <= minimumRange){
-      //Serial. println("-1");
-      distance = 0;
-    }
-    else{
-      //Serial.println(distance);
+      distance = -1;
     }
     cycleCounter = 0;
+    dataIsHot = true;
   }else{
+    dataIsHot = false;
     cycleCounter++;
   }
   
