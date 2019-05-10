@@ -129,7 +129,7 @@ ISR(TIMER1_OVF_vect){
         motor.setRightVelocity(R_rpm);
 
         //ha akadályt talál előrefele
-        if (servoCtrl.getAngle() == 90 && sonarCtrl.dataIsHot && sonarCtrl.getActualValue() < obstacleLimitInFollowing)
+        if (!servoCtrl.isRotating() && servoCtrl.getAngle() == 90 && sonarCtrl.dataIsHot && sonarCtrl.getActualValue() < obstacleLimitInFollowing)
         {
           searchingState = true;
           searchingStateLeft = true;
