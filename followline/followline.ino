@@ -105,6 +105,9 @@ ISR(TIMER1_OVF_vect){
               followingDirection = true;
               servoCtrl.setAngle(90);
             }
+          }else{
+            searchingStateLeft =false;
+            searchingStateRight = true;
           }
         }
       }
@@ -123,6 +126,11 @@ ISR(TIMER1_OVF_vect){
               servoCtrl.setAngle(90);
             }
           }
+          else
+          {
+            searchingStateRight = false;
+            searchingStateLeft = true;
+          }
         }
       }
     }
@@ -131,10 +139,12 @@ ISR(TIMER1_OVF_vect){
       if (absoluteAngle - mpuCtrl.getAngleZ() > angleLimitPID)
       {
         motor.turnLeft(base_rpm);
+        searchingStateRight = true;
       }
       else if (absoluteAngle - mpuCtrl.getAngleZ() < -angleLimitPID)
       {
         motor.turnRight(base_rpm);  
+        searchingStateLeft = true;
       }
       else
       {
@@ -155,8 +165,11 @@ ISR(TIMER1_OVF_vect){
         if (!servoCtrl.isRotating() && sonarCtrl.dataIsHot && sonarCtrl.getActualValue() < obstacleLimitInFollowing)
         {
           searchingState = true;
-          searchingStateLeft = true;
-          searchingStateRight = true;
+          if(searchingStateLeft == false && searchingStateRight == false) //Ha valaki már setelve lett akkor ne írja felül.
+          {
+            searchingStateLeft = true;
+            searchingStateRight = true;
+          }
         }
         
         //próbál az eredeti irányba tartani
