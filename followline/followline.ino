@@ -14,6 +14,7 @@ boolean initObstacleState=true;
 
 //Searchingstate values
 boolean searchingState = false;
+boolean initSearchingState = false;
 boolean searchingStateLeft = false;
 boolean searchingStateRight = false;
 int searchingValue = 10;
@@ -46,7 +47,20 @@ void setup() {
   motor.setLeftRotDirection(true);
   motor.setRightRotDirection(true);
 }
-
+void setupSearchingState()
+{
+  int tempAngle = mpuCtrl.getAngleZ();
+  if(tempAngle>0)
+  {
+    int searchingLimitLeft = searchingLimitLeft-tempAngle;
+    int searchingLimitRight = 0;
+  }else if(tempAngle < 0)
+  {
+      int searchingLimitLeft = 180;
+      int searchingLimitRight = searchingLimitRight - tempAngle;
+  }
+  initSearchingState=false;
+}
 void loop() {
   if(initObstacleState)
   {    
@@ -57,6 +71,7 @@ void loop() {
   if(mpuCanMeasure)
   {
     mpuCtrl.readAndProcessGyroData();
+    Serial.println(mpuCtrl.getAngleZ());
     mpuCanMeasure=false;    
   }
 }
@@ -87,12 +102,16 @@ ISR(TIMER1_OVF_vect){
       sonarCtrl.getMeasure();
     }
     mpuCanMeasure=true;
-
+    
     if(searchingState)
     {
       stopCar();
       if(searchingStateLeft)
       {
+        if(initSearchingState)
+        {
+          setupSearchingState();
+        }
         if(sonarCtrl.dataIsHot && !servoCtrl.isRotating()) //Ha épp jött adat a sonartól
         { 
           if(servoCtrl.getAngle()+searchingValue <= searchingLimitLeft)
@@ -136,17 +155,17 @@ ISR(TIMER1_OVF_vect){
     }
     else if (followingDirection)
     {
+      //TESZTBŐL
+      return;
       if (absoluteAngle - mpuCtrl.getAngleZ() > angleLimitPID)
       {
         motor.turnLeft(base_rpm);
         searchingStateRight = true;
-        searchingStateLeft = false;
       }
       else if (absoluteAngle - mpuCtrl.getAngleZ() < -angleLimitPID)
       {
         motor.turnRight(base_rpm);  
         searchingStateLeft = true;
-        searchingStateRight = false;
       }
       else
       {
@@ -167,6 +186,7 @@ ISR(TIMER1_OVF_vect){
         if (!servoCtrl.isRotating() && sonarCtrl.dataIsHot && sonarCtrl.getActualValue() < obstacleLimitInFollowing)
         {
           searchingState = true;
+          initSearchingState = true;
           if(searchingStateLeft == false && searchingStateRight == false) //Ha valaki már setelve lett akkor ne írja felül.
           {
             searchingStateLeft = true;
