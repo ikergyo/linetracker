@@ -54,11 +54,16 @@ void setupSearchingState()
   {
     int searchingLimitLeft = searchingLimitLeft-tempAngle;
     int searchingLimitRight = 0;
+    boolean searchingStateLeft = false;
+    boolean searchingStateRight = true;
   }else if(tempAngle < 0)
   {
       int searchingLimitLeft = 180;
       int searchingLimitRight = searchingLimitRight - tempAngle;
+      boolean searchingStateLeft = true;
+      boolean searchingStateRight = false;
   }
+  Serial.println("Setup searchingstate volt");
   initSearchingState=false;
 }
 void loop() {
@@ -71,7 +76,6 @@ void loop() {
   if(mpuCanMeasure)
   {
     mpuCtrl.readAndProcessGyroData();
-    Serial.println(mpuCtrl.getAngleZ());
     mpuCanMeasure=false;    
   }
 }
@@ -155,8 +159,7 @@ ISR(TIMER1_OVF_vect){
     }
     else if (followingDirection)
     {
-      //TESZTBŐL
-      return;
+      
       if (absoluteAngle - mpuCtrl.getAngleZ() > angleLimitPID)
       {
         motor.turnLeft(base_rpm);
@@ -169,6 +172,7 @@ ISR(TIMER1_OVF_vect){
       }
       else
       {
+
         int rpm = speedMultiplierPID * pid.LineTrackingControl(absoluteAngle, mpuCtrl.getAngleZ() );
         int R_rpm = base_rpm-rpm;
         if (R_rpm <0) R_rpm =0;
