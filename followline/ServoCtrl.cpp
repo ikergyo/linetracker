@@ -9,7 +9,6 @@ void ServoCtrl::Setup(){
     waitCycle = 0;
     actualAngle = 90;
     servo.attach(SERVO_PIN);
-    Serial.println("Beléptem");
     setAngle(90);
 }
 void ServoCtrl::update(){
