@@ -140,11 +140,13 @@ ISR(TIMER1_OVF_vect){
       {
         motor.turnLeft(base_rpm);
         searchingStateRight = true;
+        searchingStateLeft = false;
       }
       else if (absoluteAngle - mpuCtrl.getAngleZ() < -angleLimitPID)
       {
         motor.turnRight(base_rpm);  
         searchingStateLeft = true;
+        searchingStateRight = false;
       }
       else
       {
