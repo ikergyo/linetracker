@@ -81,12 +81,6 @@ void loop() {
     mpuCtrl.readAndProcessGyroData();
     mpuCanMeasure=false;    
   }
-
-  //DEBUG
-  if(sonarCtrl.dataIsHot)
-  {
-    Serial.println(sonarCtrl.getActualValue());
-  }
 }
 void stopCar(){
   motor.setLeftVelocity(0);
@@ -135,7 +129,7 @@ ISR(TIMER1_OVF_vect){
               absoluteAngle = servoCtrl.getAngle() + mpuCtrl.getAngleZ() - 90;
               searchingState = false;
               followingDirection = true;
-              servoCtrl.setAngle(90);
+              //servoCtrl.setAngle(90);
             }
           }else{
             searchingStateLeft =false;
@@ -155,7 +149,7 @@ ISR(TIMER1_OVF_vect){
               absoluteAngle = servoCtrl.getAngle() + mpuCtrl.getAngleZ() - 90;
               searchingState = false;
               followingDirection = true;
-              servoCtrl.setAngle(90);
+              //servoCtrl.setAngle(90);
             }
           }
           else
@@ -181,11 +175,10 @@ ISR(TIMER1_OVF_vect){
       }
       else
       {
-        
-
         //ha akadályt talál előrefele
         if (!servoCtrl.isRotating() && sonarCtrl.dataIsHot && sonarCtrl.getActualValue() < obstacleLimitInFollowing)
         {
+          Serial.println("Akadály előre");
           searchingState = true;
           initSearchingState = true;
           if(searchingStateLeft == false && searchingStateRight == false) //Ha valaki már setelve lett akkor ne írja felül.
@@ -193,8 +186,7 @@ ISR(TIMER1_OVF_vect){
             searchingStateLeft = true;
             searchingStateRight = true;
           }
-        }
-        
+        } 
         //próbál az eredeti irányba tartani
         else if ( !servoCtrl.isRotating() )
         {
