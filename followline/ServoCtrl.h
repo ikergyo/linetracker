@@ -3,7 +3,7 @@
 #define ServoCtrl_h
 
 #include <Servo.h>
-#define SERVO_PIN 8
+#define SERVO_PIN 9
 
 class ServoCtrl
 {

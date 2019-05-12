@@ -2,8 +2,8 @@
 #include "SonarCtrl.h"
 
 void SonarCtrl::Setup(){
-  maximumRange = 200;
-  minimumRange = 0;
+  maximumRange = 300;
+  minimumRange = 3;
   cycleCounter=0;
   distance = 0;
   duration = 0;
@@ -11,6 +11,7 @@ void SonarCtrl::Setup(){
   obstacleLimitInBadDirection = 55;
   obstacleLimitInSearching = 60;
   dataIsHot = false;
+  inMeasure=false;
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 }
@@ -20,6 +21,7 @@ long SonarCtrl::getActualValue(){
 
 void SonarCtrl::getMeasure(){
   if(cycleCounter == 5){
+    inMeasure=true;
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
   
@@ -28,11 +30,16 @@ void SonarCtrl::getMeasure(){
   
     digitalWrite(trigPin, LOW);
     duration = pulseIn(echoPin, HIGH);
-  
+    inMeasure=false;
     distance = duration/58.2;
   
-    if(distance >= maximumRange || distance <= minimumRange){
-      distance = -1;
+    if(distance >= maximumRange) 
+    {
+      distance = maximumRange;
+    }
+    else if(distance <= minimumRange)
+    {
+      distance = minimumRange;
     }
     cycleCounter = 0;
     dataIsHot = true;

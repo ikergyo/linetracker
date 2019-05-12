@@ -9,7 +9,8 @@
 
 
 boolean moveState = false;
-boolean obstacleCourse = false;
+boolean obstacleCourse = true;
+boolean initObstacleState=true;
 
 //Searchingstate values
 boolean searchingState = false;
@@ -21,11 +22,13 @@ int searchingLimitRight = 0;
 int obstacleLimitInSearching = 50;
 
 //Haladás obstacleCourse módban
-boolean followingDirection = true;
+boolean followingDirection = false;
 float angleLimitPID = 3.0f;
 float speedMultiplierPID = 10.0f;
 int obstacleLimitInFollowing = 50;
 float changeAngle = 1.0f;
+
+bool mpuCanMeasure = false;
 
 float absoluteAngle=0;
 
@@ -35,8 +38,6 @@ int base_rpm = 120;
 int onTime = 0;
 void setup() {
 
-  // put your setup code here, to run once:
-  mpuCtrl.Setup();
   sensor.Setup();
   motor.Setup();
   servoCtrl.Setup();
@@ -47,7 +48,17 @@ void setup() {
 }
 
 void loop() {
-
+  if(initObstacleState)
+  {    
+    mpuCtrl.Setup();
+    initObstacleState=false;
+    followingDirection=true;
+  }
+  if(mpuCanMeasure)
+  {
+    mpuCtrl.readAndProcessGyroData();
+    mpuCanMeasure=false;    
+  }
 }
 void stopCar(){
   motor.setLeftVelocity(0);
@@ -62,10 +73,20 @@ ISR(TIMER1_OVF_vect){
   sensor.readSensors();
   //sensor.writeDatas(sensor.sens);
   
-  if (obstacleCourse){
+  if (obstacleCourse)
+  {
+    
+    if(sonarCtrl.inMeasure)
+    {
+      return;
+    }
     servoCtrl.update();
-    sonarCtrl.getMeasure();
-    mpuCtrl.readAndProcessGyroData();
+    
+    if(!servoCtrl.isRotating())
+    {
+      sonarCtrl.getMeasure();
+    }
+    mpuCanMeasure=true;
 
     if(searchingState)
     {
@@ -82,6 +103,7 @@ ISR(TIMER1_OVF_vect){
               absoluteAngle = servoCtrl.getAngle() + mpuCtrl.getAngleZ() - 90;
               searchingState = false;
               followingDirection = true;
+              servoCtrl.setAngle(90);
             }
           }
         }
@@ -98,6 +120,7 @@ ISR(TIMER1_OVF_vect){
               absoluteAngle = servoCtrl.getAngle() + mpuCtrl.getAngleZ() - 90;
               searchingState = false;
               followingDirection = true;
+              servoCtrl.setAngle(90);
             }
           }
         }
@@ -129,7 +152,7 @@ ISR(TIMER1_OVF_vect){
         motor.setRightVelocity(R_rpm);
 
         //ha akadályt talál előrefele
-        if (!servoCtrl.isRotating() && servoCtrl.getAngle() == 90 && sonarCtrl.dataIsHot && sonarCtrl.getActualValue() < obstacleLimitInFollowing)
+        if (!servoCtrl.isRotating() && sonarCtrl.dataIsHot && sonarCtrl.getActualValue() < obstacleLimitInFollowing)
         {
           searchingState = true;
           searchingStateLeft = true;
@@ -148,7 +171,7 @@ ISR(TIMER1_OVF_vect){
           }
           else
           {
-            if(sonarCtrl.dataIsHot &&sonarCtrl.getActualValue() > obstacleLimitInFollowing)
+            if(sonarCtrl.dataIsHot && sonarCtrl.getActualValue() > obstacleLimitInFollowing)
               absoluteAngle += servoCtrl.getAngle() - 90;
             servoCtrl.setAngle(90);
           }
@@ -165,6 +188,7 @@ ISR(TIMER1_OVF_vect){
       if(sensor.needToStop()){
         moveState = false;
         obstacleCourse = true;
+        initObstacleState=true;
         motor.setLeftVelocity(0);
         motor.setRightVelocity(0);
         

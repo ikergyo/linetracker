@@ -1,8 +1,8 @@
 #ifndef SonarCtrl_h
 #define SonarCtrl_h
 
-#define echoPin 10
-#define trigPin 9
+#define echoPin 11
+#define trigPin 10
 
 class SonarCtrl{
   
@@ -15,6 +15,7 @@ public:
   int obstacleLimitFirst;
   int obstacleLimitInBadDirection;
   int obstacleLimitInSearching;
+  bool inMeasure;
   
 private:
   int cycleCounter;
