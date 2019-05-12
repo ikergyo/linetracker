@@ -17,9 +17,13 @@ boolean searchingState = false;
 boolean initSearchingState = false;
 boolean searchingStateLeft = false;
 boolean searchingStateRight = false;
-int searchingValue = 10;
-int searchingLimitLeft = 180; //90 + 180
-int searchingLimitRight = 0;
+int searchingValue = 20;
+
+const int searchingLimitLeftDefatult = 160; //90 + 180
+const int searchingLimitRightDefault = 20;
+
+int searchingLimitLeft = searchingLimitLeftDefatult; //90 + 180
+int searchingLimitRight = searchingLimitRightDefault;
 int obstacleLimitInSearching = 50;
 
 //Haladás obstacleCourse módban
@@ -52,18 +56,17 @@ void setupSearchingState()
   int tempAngle = mpuCtrl.getAngleZ();
   if(tempAngle>0)
   {
-    int searchingLimitLeft = searchingLimitLeft-tempAngle;
-    int searchingLimitRight = 0;
-    boolean searchingStateLeft = false;
-    boolean searchingStateRight = true;
+    searchingLimitLeft = searchingLimitLeft-tempAngle;
+    searchingLimitRight = searchingLimitRightDefault;
+    searchingStateLeft = false;
+    searchingStateRight = true;
   }else if(tempAngle < 0)
   {
-      int searchingLimitLeft = 180;
-      int searchingLimitRight = searchingLimitRight - tempAngle;
-      boolean searchingStateLeft = true;
-      boolean searchingStateRight = false;
+    searchingLimitLeft = searchingLimitLeftDefatult;
+    searchingLimitRight = searchingLimitRight - tempAngle;
+    searchingStateLeft = true;
+    searchingStateRight = false;
   }
-  Serial.println("Setup searchingstate volt");
   initSearchingState=false;
 }
 void loop() {
@@ -77,6 +80,12 @@ void loop() {
   {
     mpuCtrl.readAndProcessGyroData();
     mpuCanMeasure=false;    
+  }
+
+  //DEBUG
+  if(sonarCtrl.dataIsHot)
+  {
+    Serial.println(sonarCtrl.getActualValue());
   }
 }
 void stopCar(){
@@ -110,12 +119,12 @@ ISR(TIMER1_OVF_vect){
     if(searchingState)
     {
       stopCar();
+      if(initSearchingState)
+      {
+        setupSearchingState();
+      }
       if(searchingStateLeft)
       {
-        if(initSearchingState)
-        {
-          setupSearchingState();
-        }
         if(sonarCtrl.dataIsHot && !servoCtrl.isRotating()) //Ha épp jött adat a sonartól
         { 
           if(servoCtrl.getAngle()+searchingValue <= searchingLimitLeft)
@@ -172,19 +181,7 @@ ISR(TIMER1_OVF_vect){
       }
       else
       {
-
-        int rpm = speedMultiplierPID * pid.LineTrackingControl(absoluteAngle, mpuCtrl.getAngleZ() );
-        int R_rpm = base_rpm-rpm;
-        if (R_rpm <0) R_rpm =0;
-        if (R_rpm >255) R_rpm=255;
-        int L_rpm = base_rpm+rpm;
-        if (L_rpm <0) L_rpm = 0;
-        if (L_rpm >255) L_rpm = 255;
-
-        motor.setLeftRotDirection(true);
-        motor.setRightRotDirection(true);
-        motor.setLeftVelocity(L_rpm);
-        motor.setRightVelocity(R_rpm);
+        
 
         //ha akadályt talál előrefele
         if (!servoCtrl.isRotating() && sonarCtrl.dataIsHot && sonarCtrl.getActualValue() < obstacleLimitInFollowing)
@@ -215,6 +212,18 @@ ISR(TIMER1_OVF_vect){
             servoCtrl.setAngle(90);
           }
         }
+        int rpm = speedMultiplierPID * pid.LineTrackingControl(absoluteAngle, mpuCtrl.getAngleZ() );
+        int R_rpm = base_rpm-rpm;
+        if (R_rpm <0) R_rpm =0;
+        if (R_rpm >255) R_rpm=255;
+        int L_rpm = base_rpm+rpm;
+        if (L_rpm <0) L_rpm = 0;
+        if (L_rpm >255) L_rpm = 255;
+
+        motor.setLeftRotDirection(true);
+        motor.setRightRotDirection(true);
+        motor.setLeftVelocity(L_rpm);
+        motor.setRightVelocity(R_rpm);
                
       }
     }
